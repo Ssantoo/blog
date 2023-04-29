@@ -22,13 +22,19 @@ class User extends Authenticatable implements JWTSubject
         return[];
     }
 
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'userId',
+        'username',
         'email',
         'password',
     ];
