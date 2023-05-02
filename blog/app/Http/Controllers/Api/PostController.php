@@ -9,9 +9,25 @@ class PostController extends Controller
 {
     public function index()
     {
-         // 모든 게시물을 가져오는 메서드
-        $posts = Post::all(); // 모든 게시물을 조회합니다.
-        return response()->json($posts); // 조회된 게시물을 JSON 형식으로 반환합니다.
+        $perPage = $request->input('per_page', 10); //기본적으로 페이지 당 10개씩 
+        $posts = Post::with('user')->orderBy('id', 'desc')->paginate($perPage);
+
+        $responseData = $posts->getCollection()->map(function ($post) {
+            return [
+                'id' => $post->id,
+                'title' => $post->title,
+                'content' => $post->content,
+                'username' => $post->user ? $post->user->username : null,
+                'created_at' => $post->created_at,
+                'updated_at' => $post->updated_at,
+            ];
+        });
+
+        return response()->json([
+            'data' => $responseData,
+            'current_page' => $posts->currentPage(),
+            'last_page' => $posts->lastPage(),
+        ]);
     }
 
     // 새로운 게시물을 저장하는 메서드
