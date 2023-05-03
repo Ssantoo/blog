@@ -15,7 +15,18 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        $credentials = $request->validate([
+            'userId' => 'required|stirng',
+            'password' => 'required|string',
+        ]);
+
+        try{
+            if( !$token = JWTAuth::attempt($credentials)){
+                return response()->json(['error' => '접근할 수 없습니다.'], 401);
+            }
+        } catch (JWTException $e) {
+            return response()->json(['error' => '토큰 생성 불가'], 500);
+        }
         
     }
 
