@@ -38,6 +38,44 @@ class AuthController extends Controller
         ]);
     }
 
+    public function register(Request $request)
+    {
+        try {
+            $validatedData = $request->validate([
+                'userId' => 'required|string|unique:users,userId',
+                'username' => 'required|string|unique:users,username',
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|string|confirmed',
+            ]);
     
+            $user = new User([
+                'userId' => $request->userId,
+                'username' => $request->username,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+            ]);
+    
+            $user->save();
+    
+            return response()->json([
+                'message' => '회원가입 성공',
+                'user' => $user
+            ], 201);
+    
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('유효성 오류:', ['exception' =>$e]);
+            return response()->json([
+                'message' => '회원가입 실패',
+               // 'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('일반적오류:', ['exception' => $e]);
+            return response()->json([
+                'message' => '회원가입 실패',
+                //'error' => $e->getMessage()
+            ], 400);
+        }
+    }
+
 
 }
