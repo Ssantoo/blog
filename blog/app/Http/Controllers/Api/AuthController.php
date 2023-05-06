@@ -87,7 +87,16 @@ class AuthController extends Controller
         }
     }
 
-
+    //토큰 재발급
+    public function refreshToken()
+    {
+        try {
+            $token = JWTAuth::parseToken()->refresh();
+            return response()->json(['token' => $token]);
+        } catch (JWTException $e){
+            return response()->json(['error' => '실패'], 500);
+        }
+    }
 
 
 }
