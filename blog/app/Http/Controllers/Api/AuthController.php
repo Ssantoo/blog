@@ -98,5 +98,23 @@ class AuthController extends Controller
         }
     }
 
+    //인증
+    public function authenticate(Request $request)
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+
+            return response()->json([
+                'message' => '인증성공',
+                'user' => $user
+            ], 200);
+        } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+            return response()->json(['error' => '유효하지 않는 토큰입니다.'], 401);
+        } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+            return response()->json(['error' => '토큰 만료'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['error' => '토큰이 없습니다.'], 401);
+        }
+    }
 
 }
