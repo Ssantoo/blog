@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $perPage = $request->input('per_page', 10); //기본적으로 페이지 당 10개씩 
         $posts = Post::with('user')->orderBy('id', 'desc')->paginate($perPage);
@@ -61,14 +61,24 @@ class PostController extends Controller
     // 특정 게시물을 가져오는 메서드
     public function show($postId)
     {
-        $post = Post::find($postId); // 주어진 ID를 가진 게시물을 조회합니다.
+        $post = Post::with('user')->findOrFail($postId);
 
         if ($post) {
-            return response()->json($post);  // 게시물이 있으면 JSON 형식으로 반환
+            // 게시물 데이터를 사용자 이름을 포함한 새로운 구조로 변경
+            $responseData = [
+                'id' => $post->id,
+                'title' => $post->title,
+                'content' => $post->content,
+                'username' => $post->user->username, // 게시물과 관련된 사용자 이름
+                'created_at' => $post->created_at,
+                'updated_at' => $post->updated_at,
+                'user_id' => $post->user->id,
+            ];
+
+            return response()->json($responseData);
         } else {
-            return response()->json(['message' => '게시물을 찾을 수 없습니다.'], 404); // HTTP 상태 코드 404 (찾을 수 없음)와 함께 반환
+            return response()->json(['message' => '게시물을 찾을 수 없습니다.'], 404);
         }
-        
     }
 
     // 게시물을 수정하는 메서드
@@ -132,6 +142,7 @@ class PostController extends Controller
 
         return response()->json($posts);
     }
+
 
 
 
